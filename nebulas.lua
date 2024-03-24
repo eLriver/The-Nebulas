@@ -1710,18 +1710,14 @@ function Nebulas:CreateWindow(gName)
 									if v1.Text == "" and opened then
 										TextLabel_3.Visible = true
 										TextLabel_3.Text = dSeName
-										print("1")
 									elseif v1.Text ~= "" and opened then
 										TextLabel_3.Visible = false
-										print("2")
 									elseif v1.Text ~= "" and TCHECK == nil and not opened then
 										TextLabel_3.Visible = true
 										TextLabel_3.Text = dSeName -- TextBox.Text to show recent search
-										print("3")
 									elseif v1.Text ~= "" and TCHECK ~= nil and not opened then
 										TextLabel_3.Visible = true
 										TextLabel_3.Text = TCHECK
-										print("4")
 									end
 								end
 							end

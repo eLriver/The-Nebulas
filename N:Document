@@ -1,5 +1,5 @@
 
-local Library = loadstring(game:HttpGet(https://raw.githubusercontent.com/eLriver/eLr-UI-Library/main/Nebulas.lua))()
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/eLriver/Nebulas-Library/main/Nebulas.lua"))()
 
 local Window = Library:CreateWindow("BasePlate")
 
@@ -42,7 +42,7 @@ end)
 
 
 
---[[ Update UI
+--[[ About Update UI
 local label = Section:CreateLabel("Label", 30)
 label:UpdateLabel("newLabel")
 

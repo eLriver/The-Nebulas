@@ -1300,7 +1300,7 @@ function Nebulas:CreateWindow(gName)
 					if opened then
 						opened = false
 						TextBox.Text = ""
-						--TextLabel_3.Visible = true
+						TextLabel_3.Visible = true
 						ScrollingDrop.CanvasSize = UDim2.new(0, 0, 0, UIListLayout.AbsoluteContentSize.Y)
 						tween:Create(ImageLabel, tweeninfo(0.08, Enum.EasingStyle.Linear,Enum.EasingDirection.In), {
 							Rotation = 90
@@ -1671,7 +1671,7 @@ function Nebulas:CreateWindow(gName)
 					if opened then
 						opened = false
 						TextBox.Text = ""
-						TextLabel_3.Visible = true
+						--TextLabel_3.Visible = true
 						ScrollingDrop.CanvasSize = UDim2.new(0, 0, 0, UIListLayout.AbsoluteContentSize.Y)
 						tween:Create(ImageLabel, tweeninfo(0.08, Enum.EasingStyle.Linear,Enum.EasingDirection.In), {
 							Rotation = 90

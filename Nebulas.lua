@@ -1882,8 +1882,8 @@ function Nebulas:CreateWindow(gName)
 				UpdateSize()
 
 				function LabelFunctions:UpdateLabel(newText)
-					if lName.Text ~= newText then
-						lName.Text = newText
+					if TextLabel.Text ~= newText then
+						TextLabel.Text = newText
 					end
 				end
 				return LabelFunctions

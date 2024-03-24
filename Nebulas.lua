@@ -1265,7 +1265,7 @@ function Nebulas:CreateWindow(gName)
 						if v.Name == "DropSearchElement" then
 							for _,v1 in pairs(v:GetChildren()) do
 								if v1.Name == "TextBox" then
-									if v1.Text == "" and opened then
+									if v1.Text == "" and opened and TCHECK == nil then
 										TextLabel_3.Visible = true
 										TextLabel_3.Text = dsName
 									elseif v1.Text ~= "" and opened then
@@ -1299,6 +1299,8 @@ function Nebulas:CreateWindow(gName)
 				DropDown.MouseButton1Click:Connect(function ()
 					if opened then
 						opened = false
+						TextBox.Text = ""
+						--TextLabel_3.Visible = true
 						ScrollingDrop.CanvasSize = UDim2.new(0, 0, 0, UIListLayout.AbsoluteContentSize.Y)
 						tween:Create(ImageLabel, tweeninfo(0.08, Enum.EasingStyle.Linear,Enum.EasingDirection.In), {
 							Rotation = 90
@@ -1370,6 +1372,8 @@ function Nebulas:CreateWindow(gName)
 						TCHECK = v
 						callback(v)
 						TextLabel_3.Text = v
+						TextBox.Text = ""
+						TextLabel_3.Visible = true
 						for i,v in next, DropFrame:GetChildren() do
 							if v:IsA("TextButton") then
 								Utility:TweenObject(v.TextLabel, {TextColor3 = Color3.fromRGB(226, 226, 226)}, 0.2)
@@ -1439,6 +1443,8 @@ function Nebulas:CreateWindow(gName)
 							TCHECK = v
 							callback(v)
 							TextLabel_3.Text = v
+							TextBox.Text = ""
+							TextLabel_3.Visible = true
 							for i,v in next, DropFrame:GetChildren() do
 								if v:IsA("TextButton") then
 									Utility:TweenObject(v.TextLabel, {TextColor3 = Color3.fromRGB(226, 226, 226)}, 0.2)
@@ -1502,7 +1508,7 @@ function Nebulas:CreateWindow(gName)
 				list = list or {}
 				callback = callback or function() end
 
-				local DropSearchElement = Instance.new("Frame")
+				local DropSelectElement = Instance.new("Frame")
 				local UICorner = Instance.new("UICorner")
 				local TextBox = Instance.new("TextBox")
 				local ImageLabel = Instance.new("ImageLabel")
@@ -1515,19 +1521,19 @@ function Nebulas:CreateWindow(gName)
 				local UICorner_6 = Instance.new("UICorner")
 				local TextLabel_3 = Instance.new("TextLabel")
 
-				DropSearchElement.Name = "DropSearchElement"
-				DropSearchElement.Parent = inSection
-				DropSearchElement.BackgroundColor3 = Color3.fromRGB(48, 48, 48)
-				DropSearchElement.BorderColor3 = Color3.fromRGB(0, 0, 0)
-				DropSearchElement.BorderSizePixel = 0
-				DropSearchElement.ClipsDescendants = true
-				DropSearchElement.Position = UDim2.new(0, 0, 0.259316772, 0)
-				DropSearchElement.Size = UDim2.new(0, 365, 0, 34)
+				DropSelectElement.Name = "DropSelectElement"
+				DropSelectElement.Parent = inSection
+				DropSelectElement.BackgroundColor3 = Color3.fromRGB(48, 48, 48)
+				DropSelectElement.BorderColor3 = Color3.fromRGB(0, 0, 0)
+				DropSelectElement.BorderSizePixel = 0
+				DropSelectElement.ClipsDescendants = true
+				DropSelectElement.Position = UDim2.new(0, 0, 0.259316772, 0)
+				DropSelectElement.Size = UDim2.new(0, 365, 0, 34)
 
 				UICorner.CornerRadius = UDim.new(0, 5)
-				UICorner.Parent = DropSearchElement
+				UICorner.Parent = DropSelectElement
 
-				TextBox.Parent = DropSearchElement
+				TextBox.Parent = DropSelectElement
 				TextBox.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 				TextBox.BackgroundTransparency = 1.000
 				TextBox.BorderColor3 = Color3.fromRGB(0, 0, 0)
@@ -1542,7 +1548,7 @@ function Nebulas:CreateWindow(gName)
 				TextBox.TextXAlignment = Enum.TextXAlignment.Left
 				TextBox.ZIndex = 1
 
-				ImageLabel.Parent = DropSearchElement
+				ImageLabel.Parent = DropSelectElement
 				ImageLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 				ImageLabel.BackgroundTransparency = 1.000
 				ImageLabel.BorderSizePixel = 0
@@ -1553,7 +1559,7 @@ function Nebulas:CreateWindow(gName)
 				ImageLabel.Image = "http://www.roblox.com/asset/?id=16820753105"
 
 				ScrollingFrame.Name = "ScrollingFrame"
-				ScrollingFrame.Parent = DropSearchElement
+				ScrollingFrame.Parent = DropSelectElement
 				ScrollingFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 				ScrollingFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
 				ScrollingFrame.BorderSizePixel = 0
@@ -1589,7 +1595,7 @@ function Nebulas:CreateWindow(gName)
 				UIListLayout.Padding = UDim.new(0, 3)
 
 				DropDown.Name = "DropDown"
-				DropDown.Parent = DropSearchElement
+				DropDown.Parent = DropSelectElement
 				DropDown.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 				DropDown.BorderSizePixel = 0
 				DropDown.Position = UDim2.new(0, 2, 0, 2)
@@ -1623,20 +1629,24 @@ function Nebulas:CreateWindow(gName)
 
 				local function TextCheck()
 					for _,v in pairs(inSection:GetChildren()) do
-						if v.Name == "DropSearchElement" then
+						if v.Name == "DropSelectElement" then
 							for _,v1 in pairs(v:GetChildren()) do
 								if v1.Name == "TextBox" then
 									if v1.Text == "" and opened then
 										TextLabel_3.Visible = true
 										TextLabel_3.Text = dSeName
+										print("1")
 									elseif v1.Text ~= "" and opened then
 										TextLabel_3.Visible = false
+										print("2")
 									elseif v1.Text ~= "" and TCHECK == nil and not opened then
 										TextLabel_3.Visible = true
 										TextLabel_3.Text = dSeName -- TextBox.Text to show recent search
+										print("3")
 									elseif v1.Text ~= "" and TCHECK ~= nil and not opened then
 										TextLabel_3.Visible = true
 										TextLabel_3.Text = TCHECK
+										print("4")
 									end
 								end
 							end
@@ -1660,11 +1670,13 @@ function Nebulas:CreateWindow(gName)
 				DropDown.MouseButton1Click:Connect(function ()
 					if opened then
 						opened = false
+						TextBox.Text = ""
+						TextLabel_3.Visible = true
 						ScrollingDrop.CanvasSize = UDim2.new(0, 0, 0, UIListLayout.AbsoluteContentSize.Y)
 						tween:Create(ImageLabel, tweeninfo(0.08, Enum.EasingStyle.Linear,Enum.EasingDirection.In), {
 							Rotation = 90
 						}):Play()
-						DropSearchElement:TweenSize(UDim2.new(0, 365, 0, 34), "InOut", "Linear", 0.08)
+						DropSelectElement:TweenSize(UDim2.new(0, 365, 0, 34), "InOut", "Linear", 0.08)
 						ScrollingFrame.Visible = false
 						TextBox.Visible = false
 						TextBox.ZIndex = 1
@@ -1677,7 +1689,7 @@ function Nebulas:CreateWindow(gName)
 						tween:Create(ImageLabel, tweeninfo(0.08, Enum.EasingStyle.Linear,Enum.EasingDirection.In), {
 							Rotation = -90
 						}):Play()
-						DropSearchElement:TweenSize(UDim2.new(0, 365, 0, 192), "InOut", "Linear", 0.08)
+						DropSelectElement:TweenSize(UDim2.new(0, 365, 0, 192), "InOut", "Linear", 0.08)
 						ScrollingFrame.Visible = true
 						TextBox.Visible = true
 						TextBox.ZIndex = 2
@@ -1753,7 +1765,7 @@ function Nebulas:CreateWindow(gName)
 					end)
 				end
 
-                function DropSelectFunction:Refresh(newList)
+				function DropSelectFunction:Refresh(newList)
 					newList = newList or {}
 					for i,v in next, DropFrame:GetChildren() do
 						if v.Name == "Option 1" then
@@ -1796,22 +1808,22 @@ function Nebulas:CreateWindow(gName)
 						UICorner_17.Parent = Option1
 
 						Option1.MouseButton1Click:Connect(function ()
-                            --TCHECK = v
-                            if Option1.BackgroundTransparency == 1 then
-                                Utility:TweenObject(TextLabel_5, {TextColor3 = Color3.fromRGB(170, 146, 250)}, 0.2)
-                                Utility:TweenObject(Option1, {BackgroundTransparency = 0}, 0.2)
-                                table.insert(SelectedOp, Option1.TextLabel.Text)
-                            else
-                                Utility:TweenObject(TextLabel_5, {TextColor3 = Color3.fromRGB(226, 226, 226)}, 0.2)
-                                Utility:TweenObject(Option1, {BackgroundTransparency = 1}, 0.2)
-                                removeindex(SelectedOp, Option1.TextLabel.Text)
-                            end
-                            callback(SelectedOp)
-                            wait(0.1)
-                            UpdateSectionFrame()
-                            UpdateSize()
-                            --TextLabel_3.Text = v
-                        end)
+							--TCHECK = v
+							if Option1.BackgroundTransparency == 1 then
+								Utility:TweenObject(TextLabel_5, {TextColor3 = Color3.fromRGB(170, 146, 250)}, 0.2)
+								Utility:TweenObject(Option1, {BackgroundTransparency = 0}, 0.2)
+								table.insert(SelectedOp, Option1.TextLabel.Text)
+							else
+								Utility:TweenObject(TextLabel_5, {TextColor3 = Color3.fromRGB(226, 226, 226)}, 0.2)
+								Utility:TweenObject(Option1, {BackgroundTransparency = 1}, 0.2)
+								removeindex(SelectedOp, Option1.TextLabel.Text)
+							end
+							callback(SelectedOp)
+							wait(0.1)
+							UpdateSectionFrame()
+							UpdateSize()
+							--TextLabel_3.Text = v
+						end)
 						UpdateSectionFrame()
 						UpdateSize()
 					end
@@ -1820,7 +1832,7 @@ function Nebulas:CreateWindow(gName)
 						tween:Create(ImageLabel, tweeninfo(0.08, Enum.EasingStyle.Linear,Enum.EasingDirection.In), {
 							Rotation = -90
 						}):Play()
-						DropSearchElement:TweenSize(UDim2.new(0, 365, 0, 192), "InOut", "Linear", 0.08)
+						DropSelectElement:TweenSize(UDim2.new(0, 365, 0, 192), "InOut", "Linear", 0.08)
 						ScrollingFrame.Visible = true
 						TextBox.Visible = true
 						TextBox.ZIndex = 2
@@ -1836,7 +1848,7 @@ function Nebulas:CreateWindow(gName)
 						tween:Create(ImageLabel, tweeninfo(0.08, Enum.EasingStyle.Linear,Enum.EasingDirection.In), {
 							Rotation = 90
 						}):Play()
-						DropSearchElement:TweenSize(UDim2.new(0, 365, 0, 34), "InOut", "Linear", 0.08)
+						DropSelectElement:TweenSize(UDim2.new(0, 365, 0, 34), "InOut", "Linear", 0.08)
 						ScrollingFrame.Visible = false
 						TextBox.Visible = false
 						TextBox.ZIndex = 1
@@ -1844,8 +1856,8 @@ function Nebulas:CreateWindow(gName)
 						UpdateSectionFrame()
 						UpdateSize()
 					end
-                end
-                return DropSelectFunction
+				end
+				return DropSelectFunction
 			end
 
 			function Elements:CreateLabel(lName, Size)

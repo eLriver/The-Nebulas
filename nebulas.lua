@@ -426,7 +426,7 @@ function Nebulas:CreateWindow(gName)
 			TextLabel_13.BorderSizePixel = 0
 			TextLabel_13.Size = UDim2.new(0, 365, 0, 30)
 			TextLabel_13.Font = Enum.Font.GothamBold
-			TextLabel_13.Text = "Auto Farm"
+			TextLabel_13.Text = secName
 			TextLabel_13.TextColor3 = Color3.fromRGB(226, 226, 226)
 			TextLabel_13.TextSize = 16.000
 			TextLabel_13.TextXAlignment = Enum.TextXAlignment.Left

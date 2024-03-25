@@ -969,11 +969,16 @@ function Nebulas:CreateWindow(gName)
 				UpdateSize()
 
 				local opened = false
+				local SelectedName
 
 				DropDown.MouseButton1Click:Connect(function()
 					if opened then
 						opened = false
+						if SelectedName then
+							TextLabel_4.Text = SelectedName
+						end
 						ScrollingDrop.CanvasSize = UDim2.new(0, 0, 0, UIListLayout_4.AbsoluteContentSize.Y)
+						DropFrame.Size = UDim2.new(0, 353, 0, UIListLayout_4.AbsoluteContentSize.Y)
 						tween:Create(Up, tweeninfo(0.08, Enum.EasingStyle.Linear,Enum.EasingDirection.In), {
 							ImageTransparency = 1
 						}):Play()
@@ -989,6 +994,7 @@ function Nebulas:CreateWindow(gName)
 						opened = true
 						TextLabel_4.Text = dName
 						ScrollingDrop.CanvasSize = UDim2.new(0, 0, 0, UIListLayout_4.AbsoluteContentSize.Y)
+						DropFrame.Size = UDim2.new(0, 353, 0, UIListLayout_4.AbsoluteContentSize.Y)
 						tween:Create(Up, tweeninfo(0.08, Enum.EasingStyle.Linear,Enum.EasingDirection.In), {
 							ImageTransparency = 0
 						}):Play()
@@ -1042,6 +1048,7 @@ function Nebulas:CreateWindow(gName)
 						opened = false
 						callback(v)
 						TextLabel_4.Text = v
+						SelectedName = v
 						for i,v in next, DropFrame:GetChildren() do
 							if v:IsA("TextButton") then
 								Utility:TweenObject(v.TextLabel, {TextColor3 = Color3.fromRGB(226, 226, 226)}, 0.2)
@@ -1051,6 +1058,7 @@ function Nebulas:CreateWindow(gName)
 						Utility:TweenObject(TextLabel_5, {TextColor3 = Color3.fromRGB(170, 146, 250)}, 0.2)
 						Utility:TweenObject(Option1, {BackgroundTransparency = 0}, 0.2)
 						ScrollingDrop.CanvasSize = UDim2.new(0, 0, 0, UIListLayout_4.AbsoluteContentSize.Y)
+						DropFrame.Size = UDim2.new(0, 353, 0, UIListLayout_4.AbsoluteContentSize.Y)
 						tween:Create(Up, tweeninfo(0.08, Enum.EasingStyle.Linear,Enum.EasingDirection.In), {
 							ImageTransparency = 1
 						}):Play()
@@ -1111,6 +1119,7 @@ function Nebulas:CreateWindow(gName)
 							opened = false
 							callback(v)
 							TextLabel_4.Text = v
+							SelectedName = v
 							for i,v in next, DropFrame:GetChildren() do
 								if v:IsA("TextButton") then
 									Utility:TweenObject(v.TextLabel, {TextColor3 = Color3.fromRGB(226, 226, 226)}, 0.2)
@@ -1120,6 +1129,7 @@ function Nebulas:CreateWindow(gName)
 							Utility:TweenObject(TextLabel_5, {TextColor3 = Color3.fromRGB(170, 146, 250)}, 0.2)
 							Utility:TweenObject(Option1, {BackgroundTransparency = 0}, 0.2)
 							ScrollingDrop.CanvasSize = UDim2.new(0, 0, 0, UIListLayout_4.AbsoluteContentSize.Y)
+							DropFrame.Size = UDim2.new(0, 353, 0, UIListLayout_4.AbsoluteContentSize.Y)
 							tween:Create(Up, tweeninfo(0.08, Enum.EasingStyle.Linear,Enum.EasingDirection.In), {
 								ImageTransparency = 1
 							}):Play()
@@ -1136,7 +1146,9 @@ function Nebulas:CreateWindow(gName)
 						UpdateSize()
 					end
 					if opened then
+						TextLabel_4.Text = dName
 						ScrollingDrop.CanvasSize = UDim2.new(0, 0, 0, UIListLayout_4.AbsoluteContentSize.Y)
+						DropFrame.Size = UDim2.new(0, 353, 0, UIListLayout_4.AbsoluteContentSize.Y)
 						tween:Create(Up, tweeninfo(0.08, Enum.EasingStyle.Linear,Enum.EasingDirection.In), {
 							ImageTransparency = 0
 						}):Play()
@@ -1149,7 +1161,11 @@ function Nebulas:CreateWindow(gName)
 						UpdateSectionFrame()
 						UpdateSize()
 					else
+						if SelectedName then
+							TextLabel_4.Text = SelectedName
+						end
 						ScrollingDrop.CanvasSize = UDim2.new(0, 0, 0, UIListLayout_4.AbsoluteContentSize.Y)
+						DropFrame.Size = UDim2.new(0, 353, 0, UIListLayout_4.AbsoluteContentSize.Y)
 						tween:Create(Up, tweeninfo(0.08, Enum.EasingStyle.Linear,Enum.EasingDirection.In), {
 							ImageTransparency = 1
 						}):Play()
@@ -1346,6 +1362,7 @@ function Nebulas:CreateWindow(gName)
 						TextBox.Text = ""
 						TextLabel_3.Visible = true
 						ScrollingDrop.CanvasSize = UDim2.new(0, 0, 0, UIListLayout.AbsoluteContentSize.Y)
+						DropFrame.Size = UDim2.new(0, 353, 0, UIListLayout.AbsoluteContentSize.Y)
 						tween:Create(Up, tweeninfo(0.08, Enum.EasingStyle.Linear,Enum.EasingDirection.In), {
 							ImageTransparency = 1
 						}):Play()
@@ -1362,6 +1379,7 @@ function Nebulas:CreateWindow(gName)
 					else
 						opened = true
 						ScrollingDrop.CanvasSize = UDim2.new(0, 0, 0, UIListLayout.AbsoluteContentSize.Y)
+						DropFrame.Size = UDim2.new(0, 353, 0, UIListLayout.AbsoluteContentSize.Y)
 						tween:Create(Up, tweeninfo(0.08, Enum.EasingStyle.Linear,Enum.EasingDirection.In), {
 							ImageTransparency = 0
 						}):Play()
@@ -1433,6 +1451,7 @@ function Nebulas:CreateWindow(gName)
 						Utility:TweenObject(TextLabel_5, {TextColor3 = Color3.fromRGB(170, 146, 250)}, 0.2)
 						Utility:TweenObject(Option1, {BackgroundTransparency = 0}, 0.2)
 						ScrollingDrop.CanvasSize = UDim2.new(0, 0, 0, UIListLayout.AbsoluteContentSize.Y)
+						DropFrame.Size = UDim2.new(0, 353, 0, UIListLayout.AbsoluteContentSize.Y)
 						tween:Create(Up, tweeninfo(0.08, Enum.EasingStyle.Linear,Enum.EasingDirection.In), {
 							ImageTransparency = 1
 						}):Play()
@@ -1507,6 +1526,7 @@ function Nebulas:CreateWindow(gName)
 							Utility:TweenObject(TextLabel_5, {TextColor3 = Color3.fromRGB(170, 146, 250)}, 0.2)
 							Utility:TweenObject(Option1, {BackgroundTransparency = 0}, 0.2)
 							ScrollingDrop.CanvasSize = UDim2.new(0, 0, 0, UIListLayout.AbsoluteContentSize.Y)
+							DropFrame.Size = UDim2.new(0, 353, 0, UIListLayout.AbsoluteContentSize.Y)
 							tween:Create(Up, tweeninfo(0.08, Enum.EasingStyle.Linear,Enum.EasingDirection.In), {
 								ImageTransparency = 1
 							}):Play()
@@ -1526,6 +1546,7 @@ function Nebulas:CreateWindow(gName)
 					end
 					if opened then
 						ScrollingDrop.CanvasSize = UDim2.new(0, 0, 0, UIListLayout.AbsoluteContentSize.Y)
+						DropFrame.Size = UDim2.new(0, 353, 0, UIListLayout.AbsoluteContentSize.Y)
 						tween:Create(Up, tweeninfo(0.08, Enum.EasingStyle.Linear,Enum.EasingDirection.In), {
 							ImageTransparency = 0
 						}):Play()
@@ -1545,6 +1566,7 @@ function Nebulas:CreateWindow(gName)
 						UpdateSize()
 					else
 						ScrollingDrop.CanvasSize = UDim2.new(0, 0, 0, UIListLayout.AbsoluteContentSize.Y)
+						DropFrame.Size = UDim2.new(0, 353, 0, UIListLayout.AbsoluteContentSize.Y)
 						tween:Create(Up, tweeninfo(0.08, Enum.EasingStyle.Linear,Enum.EasingDirection.In), {
 							ImageTransparency = 1
 						}):Play()
@@ -1744,6 +1766,7 @@ function Nebulas:CreateWindow(gName)
 						TextBox.Text = ""
 						TextLabel_3.Visible = true
 						ScrollingDrop.CanvasSize = UDim2.new(0, 0, 0, UIListLayout.AbsoluteContentSize.Y)
+						DropFrame.Size = UDim2.new(0, 353, 0, UIListLayout.AbsoluteContentSize.Y)
 						tween:Create(Up, tweeninfo(0.08, Enum.EasingStyle.Linear,Enum.EasingDirection.In), {
 							ImageTransparency = 1
 						}):Play()
@@ -1760,6 +1783,7 @@ function Nebulas:CreateWindow(gName)
 					else
 						opened = true
 						ScrollingDrop.CanvasSize = UDim2.new(0, 0, 0, UIListLayout.AbsoluteContentSize.Y)
+						DropFrame.Size = UDim2.new(0, 353, 0, UIListLayout.AbsoluteContentSize.Y)
 						tween:Create(Up, tweeninfo(0.08, Enum.EasingStyle.Linear,Enum.EasingDirection.In), {
 							ImageTransparency = 0
 						}):Play()
@@ -1815,7 +1839,7 @@ function Nebulas:CreateWindow(gName)
 
 					UICorner_17.Parent = Option1
 
-					local function removeindex(array, index)
+					function removeindex(array, index)
 						for i,v in pairs(array) do
 							if v == index then
 								table.remove(array, i)
@@ -1846,6 +1870,7 @@ function Nebulas:CreateWindow(gName)
 					newList = newList or {}
 					for i,v in next, DropFrame:GetChildren() do
 						if v.Name == "Option 1" then
+							removeindex(SelectedOp, v.TextLabel.Text)
 							v:Destroy()
 						end
 					end
@@ -1906,6 +1931,7 @@ function Nebulas:CreateWindow(gName)
 					end
 					if opened then
 						ScrollingDrop.CanvasSize = UDim2.new(0, 0, 0, UIListLayout.AbsoluteContentSize.Y)
+						DropFrame.Size = UDim2.new(0, 353, 0, UIListLayout.AbsoluteContentSize.Y)
 						tween:Create(Up, tweeninfo(0.08, Enum.EasingStyle.Linear,Enum.EasingDirection.In), {
 							ImageTransparency = 0
 						}):Play()
@@ -1925,6 +1951,7 @@ function Nebulas:CreateWindow(gName)
 						UpdateSize()
 					else
 						ScrollingDrop.CanvasSize = UDim2.new(0, 0, 0, UIListLayout.AbsoluteContentSize.Y)
+						DropFrame.Size = UDim2.new(0, 353, 0, UIListLayout.AbsoluteContentSize.Y)
 						tween:Create(Up, tweeninfo(0.08, Enum.EasingStyle.Linear,Enum.EasingDirection.In), {
 							ImageTransparency = 1
 						}):Play()

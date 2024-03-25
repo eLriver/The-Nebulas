@@ -975,7 +975,7 @@ function Nebulas:CreateWindow(gName)
 					if opened then
 						opened = false
 						if SelectedName then
-							TextLabel_4.Text = SelectedName
+							TextLabel_4.Text = dName..SelectedName
 						end
 						ScrollingDrop.CanvasSize = UDim2.new(0, 0, 0, UIListLayout_4.AbsoluteContentSize.Y)
 						DropFrame.Size = UDim2.new(0, 353, 0, UIListLayout_4.AbsoluteContentSize.Y)
@@ -992,7 +992,11 @@ function Nebulas:CreateWindow(gName)
 						UpdateSize()
 					else
 						opened = true
-						TextLabel_4.Text = dName
+						if SelectedName then
+							TextLabel_4.Text = dName..SelectedName
+						else
+							TextLabel_4.Text = dName
+						end
 						ScrollingDrop.CanvasSize = UDim2.new(0, 0, 0, UIListLayout_4.AbsoluteContentSize.Y)
 						DropFrame.Size = UDim2.new(0, 353, 0, UIListLayout_4.AbsoluteContentSize.Y)
 						tween:Create(Up, tweeninfo(0.08, Enum.EasingStyle.Linear,Enum.EasingDirection.In), {
@@ -1047,7 +1051,7 @@ function Nebulas:CreateWindow(gName)
 					Option1.MouseButton1Click:Connect(function ()
 						opened = false
 						callback(v)
-						TextLabel_4.Text = v
+						TextLabel_4.Text = dName..v
 						SelectedName = v
 						for i,v in next, DropFrame:GetChildren() do
 							if v:IsA("TextButton") then
@@ -1118,7 +1122,7 @@ function Nebulas:CreateWindow(gName)
 						Option1.MouseButton1Click:Connect(function ()
 							opened = false
 							callback(v)
-							TextLabel_4.Text = v
+							TextLabel_4.Text = dName..v
 							SelectedName = v
 							for i,v in next, DropFrame:GetChildren() do
 								if v:IsA("TextButton") then
@@ -1162,7 +1166,8 @@ function Nebulas:CreateWindow(gName)
 						UpdateSize()
 					else
 						if SelectedName then
-							TextLabel_4.Text = SelectedName
+							SelectedName = ""
+							TextLabel_4.Text = dName
 						end
 						ScrollingDrop.CanvasSize = UDim2.new(0, 0, 0, UIListLayout_4.AbsoluteContentSize.Y)
 						DropFrame.Size = UDim2.new(0, 353, 0, UIListLayout_4.AbsoluteContentSize.Y)
@@ -1439,7 +1444,7 @@ function Nebulas:CreateWindow(gName)
 						opened = false
 						TCHECK = v
 						callback(v)
-						TextLabel_3.Text = v
+						TextLabel_3.Text = dsName..v
 						TextBox.Text = ""
 						TextLabel_3.Visible = true
 						for i,v in next, DropFrame:GetChildren() do
@@ -1472,6 +1477,7 @@ function Nebulas:CreateWindow(gName)
 					newList = newList or {}
 					for i,v in next, DropFrame:GetChildren() do
 						if v.Name == "Option 1" then
+							TextLabel_3.Text = dsName
 							v:Destroy()
 						end
 					end
@@ -1514,7 +1520,7 @@ function Nebulas:CreateWindow(gName)
 							opened = false
 							TCHECK = v
 							callback(v)
-							TextLabel_3.Text = v
+							TextLabel_3.Text = dsName..v
 							TextBox.Text = ""
 							TextLabel_3.Visible = true
 							for i,v in next, DropFrame:GetChildren() do
@@ -1729,14 +1735,14 @@ function Nebulas:CreateWindow(gName)
 						if v.Name == "DropSelectElement" then
 							for _,v1 in pairs(v:GetChildren()) do
 								if v1.Name == "TextBox" then
-									if v1.Text == "" and opened then
+									if v1.Text == "" and opened and TCHECK == nil then
 										TextLabel_3.Visible = true
 										TextLabel_3.Text = dSeName
 									elseif v1.Text ~= "" and opened then
 										TextLabel_3.Visible = false
 									elseif v1.Text ~= "" and TCHECK == nil and not opened then
 										TextLabel_3.Visible = true
-										TextLabel_3.Text = dSeName -- TextBox.Text to show recent search
+										TextLabel_3.Text = TCHECK -- TextBox.Text to show recent search
 									elseif v1.Text ~= "" and TCHECK ~= nil and not opened then
 										TextLabel_3.Visible = true
 										TextLabel_3.Text = TCHECK
@@ -1847,16 +1853,33 @@ function Nebulas:CreateWindow(gName)
 						end
 					end
 
+					function addString(TBle, textLabel, add)
+						local a = add..", "
+						if table.find(TBle, add) then
+							if not textLabel.Text:match(add) then
+								textLabel.Text = textLabel.Text..a
+								TCHECK = textLabel.Text..a
+								print("Add")
+							end
+						else
+							local b = string.gsub(textLabel.Text, a, "" )
+							textLabel.Text = b
+							TCHECK = b
+							print("Delete")
+						end
+					end
+
 					Option1.MouseButton1Click:Connect(function ()
-						--TCHECK = v
 						if Option1.BackgroundTransparency == 1 then
 							Utility:TweenObject(TextLabel_5, {TextColor3 = Color3.fromRGB(170, 146, 250)}, 0.2)
 							Utility:TweenObject(Option1, {BackgroundTransparency = 0}, 0.2)
 							table.insert(SelectedOp, Option1.TextLabel.Text)
+							addString(SelectedOp, TextLabel_3, Option1.TextLabel.Text)
 						else
 							Utility:TweenObject(TextLabel_5, {TextColor3 = Color3.fromRGB(226, 226, 226)}, 0.2)
 							Utility:TweenObject(Option1, {BackgroundTransparency = 1}, 0.2)
 							removeindex(SelectedOp, Option1.TextLabel.Text)
+							addString(SelectedOp, TextLabel_3, Option1.TextLabel.Text)
 						end
 						callback(SelectedOp)
 						wait(0.1)
@@ -1868,9 +1891,11 @@ function Nebulas:CreateWindow(gName)
 
 				function DropSelectFunction:Refresh(newList)
 					newList = newList or {}
+					table.clear(SelectedOp)
 					for i,v in next, DropFrame:GetChildren() do
 						if v.Name == "Option 1" then
 							removeindex(SelectedOp, v.TextLabel.Text)
+							addString(SelectedOp, TextLabel_3, v.TextLabel.Text)
 							v:Destroy()
 						end
 					end
@@ -1910,15 +1935,16 @@ function Nebulas:CreateWindow(gName)
 						UICorner_17.Parent = Option1
 
 						Option1.MouseButton1Click:Connect(function ()
-							--TCHECK = v
 							if Option1.BackgroundTransparency == 1 then
 								Utility:TweenObject(TextLabel_5, {TextColor3 = Color3.fromRGB(170, 146, 250)}, 0.2)
 								Utility:TweenObject(Option1, {BackgroundTransparency = 0}, 0.2)
 								table.insert(SelectedOp, Option1.TextLabel.Text)
+								addString(SelectedOp, TextLabel_3, Option1.TextLabel.Text)
 							else
 								Utility:TweenObject(TextLabel_5, {TextColor3 = Color3.fromRGB(226, 226, 226)}, 0.2)
 								Utility:TweenObject(Option1, {BackgroundTransparency = 1}, 0.2)
 								removeindex(SelectedOp, Option1.TextLabel.Text)
+								addString(SelectedOp, TextLabel_3, Option1.TextLabel.Text)
 							end
 							callback(SelectedOp)
 							wait(0.1)

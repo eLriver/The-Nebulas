@@ -1,0 +1,794 @@
+local Library = {Toggle = true, FirstTab = nil, TabCount = 0, ColorTable = {}}
+
+local RunService = game:GetService("RunService")
+local HttpService = game:GetService("HttpService")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local Camera = game.Workspace.CurrentCamera
+_G.windowname = HttpService:GenerateGUID(false)
+
+local function MakeDraggable(ClickObject, Object)
+	local Dragging = nil
+	local DragInput = nil
+	local DragStart = nil
+	local StartPosition = nil
+
+	ClickObject.InputBegan:Connect(function(Input)
+		if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
+			Dragging = true
+			DragStart = Input.Position
+			StartPosition = Object.Position
+
+			if Input.UserInputType == Enum.UserInputType.Touch then
+                Camera.CameraType = Enum.CameraType.Scriptable
+            end
+
+			Input.Changed:Connect(function()
+				if Input.UserInputState == Enum.UserInputState.End then
+					Dragging = false
+
+					if Input.UserInputType == Enum.UserInputType.Touch then
+                        Camera.CameraType = Enum.CameraType.Custom
+                    end
+				end
+			end)
+		end
+	end)
+
+	ClickObject.InputChanged:Connect(function(Input)
+		if Input.UserInputType == Enum.UserInputType.MouseMovement or Input.UserInputType == Enum.UserInputType.Touch then
+			DragInput = Input
+		end
+	end)
+
+	UserInputService.InputChanged:Connect(function(Input)
+		if Input == DragInput and Dragging then
+			local Delta = Input.Position - DragStart
+			Object.Position = UDim2.new(StartPosition.X.Scale, StartPosition.X.Offset + Delta.X, StartPosition.Y.Scale, StartPosition.Y.Offset + Delta.Y)
+		end
+	end)
+end
+
+local function ToggleUI()
+	UserInputService.InputBegan:Connect(function(Input)
+		if Input.KeyCode == Enum.KeyCode.RightControl and Library.Toggle then
+			game.CoreGui[_G.windowname].Window.Visible = false
+			Library.Toggle = false
+		elseif Input.KeyCode == Enum.KeyCode.RightControl and not Library.Toggle then
+			game.CoreGui[_G.windowname].Window.Visible = true
+			Library.Toggle = true
+		end
+	end)
+end
+
+function Library:CreateWindow(Name, Parent)
+	local WindowInit = {}
+	local Folder = game:GetObjects("rbxassetid://124453186571859")[1]
+	local Screen = Folder.Nebulas:Clone()
+	local MobileToggle = Screen.MobileToggle
+	local Window = Screen.Window
+	local Topbar = Window.Topbar
+	local TContainer = Window.TContainer
+	local TBContainer = Window.TBContainer
+	--[[
+	-- idk probably fix for exploits that dont have this function
+	if syn and syn.protect_gui then
+		syn.protect_gui(Screen)
+	end
+	]]
+
+	Screen.Name = _G.windowname
+	Screen.Parent = Parent
+	Window.GameName.Text = Name
+
+	MakeDraggable(Topbar, Window)
+	ToggleUI()
+	local function CloseAll()
+		for _,Tab in pairs(TContainer:GetChildren()) do
+			if Tab:IsA("ScrollingFrame") then
+				Tab.Visible = false
+			end
+		end
+	end
+	local function ResetAll()
+		for _,TabButton in pairs(TBContainer:GetChildren()) do
+			if TabButton:IsA("TextButton") then
+				TweenService:Create(TabButton:FindFirstChild("Selected"), TweenInfo.new(0.2, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {BackgroundTransparency = 1}):Play()
+				TweenService:Create(TabButton.Title, TweenInfo.new(0.2, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {TextColor3 = Color3.fromRGB(228, 228, 228)}):Play()
+			end
+		end
+	end
+	local function KeepFirst()
+		for _,Tab in pairs(TContainer:GetChildren()) do
+			if Tab:IsA("ScrollingFrame") then
+				if Tab.Name == Library.FirstTab .. " T" then
+					Tab.Visible = true
+				else
+					Tab.Visible = false
+				end
+			end
+		end
+		for _,TabButton in pairs(TBContainer:GetChildren()) do
+			if TabButton:IsA("TextButton") then
+				if TabButton.Name == Library.FirstTab .. " TB" then
+					TweenService:Create(TabButton:FindFirstChild("Selected"), TweenInfo.new(0.2, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {BackgroundTransparency = 0}):Play()
+					TweenService:Create(TabButton.Title, TweenInfo.new(0.2, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {TextColor3 = Color3.fromRGB(170, 146, 250)}):Play()
+				else
+					TweenService:Create(TabButton:FindFirstChild("Selected"), TweenInfo.new(0.2, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {BackgroundTransparency = 1}):Play()
+					TweenService:Create(TabButton.Title, TweenInfo.new(0.2, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {TextColor3 = Color3.fromRGB(228, 228, 228)}):Play()
+				end
+			end
+		end
+	end
+
+	TBContainer.UIListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+		TBContainer.CanvasSize = UDim2.new(0,0,0,TBContainer.UIListLayout.AbsoluteContentSize.Y + 5)
+	end)
+
+	MakeDraggable(MobileToggle, MobileToggle)
+	local isMoved = false
+	local isDown = false
+	MobileToggle.MouseButton1Down:Connect(function()
+		isMoved = false
+		isDown = true
+	end)
+
+	MobileToggle.MouseButton1Up:Connect(function()
+		if isDown and not isMoved then
+			if Library.Toggle then
+				game.CoreGui[_G.windowname].Window.Visible = false
+				Library.Toggle = false
+			else
+				game.CoreGui[_G.windowname].Window.Visible = true
+				Library.Toggle = true
+			end
+		end
+		isDown = false
+	end)
+
+	MobileToggle.InputChanged:Connect(function(Input)
+		if Input.UserInputType == Enum.UserInputType.MouseMovement or Input.UserInputType == Enum.UserInputType.Touch then
+			isMoved = true
+		end
+	end)
+
+	function WindowInit:CreateTab(Name)
+		local TabInit = {}
+		local Tab = Folder.Tab:Clone()
+		local TabButton = Folder.TabButton:Clone()
+
+		Tab.Name = Name .. " T"
+		Tab.Parent = TContainer
+
+		TabButton.Name = Name .. " TB"
+		TabButton.Parent = TBContainer
+		TabButton.Title.Text = Name
+		TabButton:FindFirstChild("Selected").Visible = true
+
+		table.insert(Library.ColorTable, TabButton)
+		Library.TabCount = Library.TabCount + 1
+		if Library.TabCount == 1 then
+			Library.FirstTab = Name
+		end
+
+		CloseAll()
+		ResetAll()
+		KeepFirst()
+
+		TabButton.MouseButton1Click:Connect(function()
+			CloseAll()
+			ResetAll()
+			Tab.Visible = true
+			TweenService:Create(TabButton:FindFirstChild("Selected"), TweenInfo.new(0.2, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {BackgroundTransparency = 0}):Play()
+			TweenService:Create(TabButton.Title, TweenInfo.new(0.2, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {TextColor3 = Color3.fromRGB(170, 146, 250)}):Play()
+		end)
+
+		Tab.UIListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+			Tab.CanvasSize = UDim2.new(0,0,0,Tab.UIListLayout.AbsoluteContentSize.Y)
+		end)
+
+		function TabInit:CreateSection(Name)
+			local SectionInit = {}
+			local Section = Folder.Section:Clone()
+			Section.Name = Name .. " S"
+			Section.Parent = Tab
+
+			Section.Title.Text = Name
+			Section.Title.Size = UDim2.new(0,365,0,Section.Title.TextBounds.Y + 14)
+			Section.Container.Position = UDim2.new(0,0,0,Section.Title.TextBounds.Y + 14)
+			Section.SectionLine.Position = UDim2.new(0,0,0,Section.Title.TextBounds.Y + 14)
+
+			Section.Container.UIListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+				Section.Size = UDim2.new(0,365,0,Section.Container.UIListLayout.AbsoluteContentSize.Y + 43)
+				Section.Container.Size = UDim2.new(0,365,0,Section.Container.UIListLayout.AbsoluteContentSize.Y)
+				Section.SectionLine.Position = UDim2.new(0,0,0,Section.Container.UIListLayout.AbsoluteContentSize.Y + 40)
+			end)
+
+
+			function SectionInit:CreateLabel(Name)
+				local LabelInit = {}
+				local Label = Folder.Label:Clone()
+				Label.Name = Name .. " L"
+				Label.Parent = Section.Container
+				Label.Text = Name
+				Label.Size = UDim2.new(0,354,0,Label.TextBounds.Y)
+				function LabelInit:UpdateText(Text)
+					Label.Text = Text
+					Label.Size = UDim2.new(0,354,0,Label.TextBounds.Y)
+				end
+
+				return LabelInit
+			end
+			function SectionInit:CreateButton(Name, Callback)
+				local ButtonInit = {}
+				local Button = Folder.Button:Clone()
+				Button.Name = Name .. " B"
+				Button.Parent = Section.Container
+				Button.Title.Text = Name
+				Button.Title.Size = UDim2.new(0,365,0,Button.Title.TextBounds.Y + 15)
+				Button.Size = UDim2.new(0,365,0,Button.Title.TextBounds.Y + 19)
+
+				function ButtonInit:UpdateText(Text)
+					Button.Title.Text = Text
+					Button.Title.Size = UDim2.new(0,365,0,Button.Title.TextBounds.Y + 15)
+					Button.Size = UDim2.new(0,365,0,Button.Title.TextBounds.Y + 19)
+				end
+
+				table.insert(Library.ColorTable, Button)
+
+				Button.MouseButton1Down:Connect(function()
+					TweenService:Create(Button.Title, TweenInfo.new(0.05, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {TextTransparency = 0.6}):Play()
+				end)
+
+				Button.MouseButton1Up:Connect(function()
+					TweenService:Create(Button.Title, TweenInfo.new(0.4, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {TextTransparency = 0}):Play()
+				end)
+
+				Button.MouseLeave:Connect(function()
+					TweenService:Create(Button.Title, TweenInfo.new(0.4, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {TextTransparency = 0}):Play()
+				end)
+
+				Button.MouseButton1Click:Connect(function()
+					Callback()
+				end)
+
+				return ButtonInit
+			end
+			function SectionInit:CreateTextBox(PlaceHolder, NumbersOnly, Callback)
+				local TextBoxInit = {}
+				local TextBox = Folder.TextBox:Clone()
+				TextBox.Name = PlaceHolder .. " TB"
+				TextBox.Parent = Section.Container
+				TextBox.Inside.Input.PlaceholderText = PlaceHolder
+
+				TextBox.Inside.Input.FocusLost:Connect(function()
+					if NumbersOnly then
+						if tonumber(TextBox.Inside.Input.Text) then
+							Callback(tonumber(TextBox.Inside.Input.Text))
+						--else
+							--TextBox.Inside.Input.Text = ""
+						end
+					else
+						Callback(TextBox.Inside.Input.Text)
+					end
+				end)
+				function TextBoxInit:SetValue(String)
+					Callback(String)
+					TextBox.Inside.Input.Text = String
+				end
+
+				return TextBoxInit
+			end
+			function SectionInit:CreateToggle(Name, Default, Callback)
+				local DefaultLocal = Default or false
+				local ToggleInit = {}
+				local Toggle = Folder.Toggle:Clone()
+				Toggle.Name = Name .. " T"
+				Toggle.Parent = Section.Container
+				Toggle.Title.Text = Name
+				--Toggle.Title.Size = UDim2.new(0,0,0,Toggle.Title.TextBounds.Y + 15)
+				--Toggle.Inside.Size = UDim2.new(0,0,0,Toggle.Title.TextBounds.Y + 15)
+				--Toggle.Size = UDim2.new(0,0,0,Toggle.Title.TextBounds.Y + 19)
+
+				table.insert(Library.ColorTable, Toggle.ImageOn)
+				local ToggleState = false
+
+				local function SetState(State)
+					if State then
+						game.TweenService:Create(Toggle.ImageOn, TweenInfo.new(0.2, Enum.EasingStyle.Linear,Enum.EasingDirection.In), {
+							ImageTransparency = 0
+						}):Play()
+						game.TweenService:Create(Toggle.ImageOff, TweenInfo.new(0.2, Enum.EasingStyle.Linear,Enum.EasingDirection.In), {
+							ImageTransparency = 1
+						}):Play()
+					elseif not State then
+						game.TweenService:Create(Toggle.ImageOn, TweenInfo.new(0.2, Enum.EasingStyle.Linear,Enum.EasingDirection.In), {
+							ImageTransparency = 1
+						}):Play()
+						game.TweenService:Create(Toggle.ImageOff, TweenInfo.new(0.2, Enum.EasingStyle.Linear,Enum.EasingDirection.In), {
+							ImageTransparency = 0
+						}):Play()
+					end
+					ToggleState = State
+					Callback(State)
+				end
+
+				Toggle.MouseButton1Click:Connect(function()
+					ToggleState = not ToggleState
+					SetState(ToggleState)
+				end)
+
+				function ToggleInit:SetState(State)
+					SetState(State)
+				end
+
+				function ToggleInit:GetState()
+					return ToggleState
+				end
+
+				if Default ~= nil then
+					SetState(DefaultLocal)
+				end
+
+				return ToggleInit
+			end
+			function SectionInit:CreateSlider(Name, Min, Max, Default, Precise, Callback)
+				local DefaultLocal = Default or 50
+				local SliderInit = {}
+				local Slider = Folder.Slider:Clone()
+				Slider.Name = Name .. " S"
+				Slider.Parent = Section.Container
+
+				Slider.Title.Text = Name
+				Slider.SliderButton.Bar.Size = UDim2.new(Min / Max,0,1,0)
+				Slider.Value.PlaceholderText = tostring(Min / Max)
+				--Slider.Title.Size = UDim2.new(0,0,0,Slider.Title.TextBounds.Y + 10)
+				--Slider.Size = UDim2.new(0,0,0,Slider.Title.TextBounds.Y + 39)
+				--Slider.Inside.Size = UDim2.new(0,0,0,Slider.Title.TextBounds.Y + 35)
+				--Slider.SliderButton.Position = UDim2.new(0,0,0,Slider.Title.TextBounds.Y + 22)
+				table.insert(Library.ColorTable, Slider.SliderButton.Bar)
+
+				local GlobalSliderValue = 0
+				local Dragging = false
+				local function Sliding(Input)
+                    local Position = UDim2.new(math.clamp((Input.Position.X - Slider.SliderButton.AbsolutePosition.X) / Slider.SliderButton.AbsoluteSize.X,0,1),0,1,0)
+                    Slider.SliderButton.Bar.Size = Position
+					local SliderPrecise = ((Position.X.Scale * Max) / Max) * (Max - Min) + Min
+					local SliderNonPrecise = math.floor(((Position.X.Scale * Max) / Max) * (Max - Min) + Min)
+                    local SliderValue = Precise and SliderNonPrecise or SliderPrecise
+					SliderValue = tonumber(string.format("%.2f", SliderValue))
+					GlobalSliderValue = SliderValue
+                    Slider.Value.PlaceholderText = tostring(SliderValue)
+                    Callback(GlobalSliderValue)
+                end
+				local function SetValue(Value)
+					GlobalSliderValue = Value
+					Slider.SliderButton.Bar.Size = UDim2.new(Value / Max,0,1,0)
+					Slider.Value.PlaceholderText = Value
+					Callback(Value)
+				end
+				Slider.Value.FocusLost:Connect(function()
+					if not tonumber(Slider.Value.Text) then
+						Slider.Value.Text = GlobalSliderValue
+					elseif Slider.Value.Text == "" or tonumber(Slider.Value.Text) <= Min then
+						Slider.Value.Text = Min
+					elseif Slider.Value.Text == "" or tonumber(Slider.Value.Text) >= Max then
+						Slider.Value.Text = Max
+					end
+
+					GlobalSliderValue = Slider.Value.Text
+					Slider.SliderButton.Bar.Size = UDim2.new(Slider.Value.Text / Max,0,1,0)
+					Slider.Value.PlaceholderText = Slider.Value.Text
+					Callback(tonumber(Slider.Value.Text))
+					Slider.Value.Text = ""
+				end)
+
+				Slider.SliderButton.InputBegan:Connect(function(Input)
+                    if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
+                        Sliding(Input)
+						Dragging = true
+                    end
+                end)
+
+				Slider.SliderButton.InputEnded:Connect(function(Input)
+                    if Input.UserInputState == Enum.UserInputState.End then
+						Dragging = false
+                    end
+                end)
+
+				UserInputService.InputChanged:Connect(function(Input)
+					if Dragging and (Input.UserInputType == Enum.UserInputType.MouseMovement or Input.UserInputType == Enum.UserInputType.Touch) then
+						Sliding(Input)
+					end
+				end)
+
+				function SliderInit:SetValue(Value)
+					GlobalSliderValue = Value
+					Slider.SliderButton.Bar.Size = UDim2.new(Value / Max,0,1,0)
+					Slider.Value.PlaceholderText = Value
+					Callback(Value)
+				end
+
+				function SliderInit:GetValue()
+					return GlobalSliderValue
+				end
+
+				if Default ~= nil then
+					SetValue(DefaultLocal)
+				end
+
+				return SliderInit
+			end
+			function SectionInit:CreateDropdown(Name, OptionTable, Callback, InitialValue)
+				local DropdownInit = {}
+				local Dropdown = Folder.Dropdown:Clone()
+				Dropdown.Name = Name .. " D"
+				Dropdown.Parent = Section.Container
+
+				Dropdown.DButton.Title.Text = Name
+
+				Dropdown.Holder.Container.UIListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+					Dropdown.Holder.Container.CanvasSize = UDim2.new(0,0,0,Dropdown.Holder.Container.UIListLayout.AbsoluteContentSize.Y)
+				end)
+
+				local DropdownToggle = false
+
+				Dropdown.DButton.MouseButton1Click:Connect(function()
+					DropdownToggle = not DropdownToggle
+					if DropdownToggle then
+						TweenService:Create(Dropdown, TweenInfo.new(0.25, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {Size = UDim2.new(0,365,0,192)}):Play()
+						TweenService:Create(Dropdown.Holder, TweenInfo.new(0.25, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {Size = UDim2.new(0,361,0,163)}):Play()
+						TweenService:Create(Dropdown.ImageArrow, TweenInfo.new(0.25, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {Rotation = -180}):Play()
+					else
+						TweenService:Create(Dropdown, TweenInfo.new(0.25, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {Size = UDim2.new(0,365,0,34)}):Play()
+						TweenService:Create(Dropdown.Holder, TweenInfo.new(0.25, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {Size = UDim2.new(0,361,0,0)}):Play()
+						TweenService:Create(Dropdown.ImageArrow, TweenInfo.new(0.25, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {Rotation = 0}):Play()
+					end
+				end)
+
+				local function ResetOption()
+					for _,Options in pairs(Dropdown.Holder.Container:GetChildren()) do
+						if Options:IsA("TextButton") then
+							TweenService:Create(Options, TweenInfo.new(0.1, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {BackgroundTransparency = 1}):Play()
+							TweenService:Create(Options.Title, TweenInfo.new(0.1, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {TextColor3 = Color3.fromRGB(226, 226, 226)}):Play()
+						end
+					end
+				end
+
+				for _,OptionName in pairs(OptionTable) do
+					local Option = Folder.Option:Clone()
+					Option.Name = OptionName
+					Option.Parent = Dropdown.Holder.Container
+
+					Option.Title.Text = OptionName
+					table.insert(Library.ColorTable, Option)
+
+					Option.MouseButton1Click:Connect(function()
+						ResetOption()
+						Dropdown.DButton.Title.Text = Name .. OptionName
+						TweenService:Create(Option, TweenInfo.new(0.1, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {BackgroundTransparency = 0}):Play()
+						TweenService:Create(Option.Title, TweenInfo.new(0.1, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {TextColor3 = Color3.fromRGB(170, 146, 250)}):Play()
+						Callback(OptionName)
+						DropdownToggle = not DropdownToggle
+						TweenService:Create(Dropdown, TweenInfo.new(0.25, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {Size = UDim2.new(0,365,0,34)}):Play()
+						TweenService:Create(Dropdown.Holder, TweenInfo.new(0.25, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {Size = UDim2.new(0,361,0,0)}):Play()
+						TweenService:Create(Dropdown.ImageArrow, TweenInfo.new(0.25, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {Rotation = 0}):Play()
+					end)
+				end
+
+				function DropdownInit:GetOption()
+					return string.gsub(Dropdown.DButton.Title.Text, Name, "")
+				end
+				function DropdownInit:SetOption(sName)
+					for _,Option in pairs(Dropdown.Holder.Container:GetChildren()) do
+						if Option:IsA("TextButton") and string.find(Option.Name, sName) then
+							Dropdown.DButton.Title.Text = Name .. Option.Name
+							Option.BackgroundTransparency = 0
+							Option.Title.TextColor3 = Color3.fromRGB(170, 146, 250)
+						elseif Option:IsA("TextButton") and not string.find(Option.Name, sName) then
+							Option.BackgroundTransparency = 1
+							Option.Title.TextColor3 = Color3.fromRGB(226, 226, 226)
+						end
+					end
+					Callback(sName)
+				end
+				function DropdownInit:RemoveOption(sName)
+					for _,Option in pairs(Dropdown.Holder.Container:GetChildren()) do
+						if Option:IsA("TextButton") and string.find(Option.Name, sName) then
+							Option:Destroy()
+						end
+					end
+					if string.find(Dropdown.DButton.Title.Text, sName) then
+						Dropdown.DButton.Title.Text = Name
+					end
+				end
+				function DropdownInit:ClearOptions()
+					for _, Option in pairs(Dropdown.Holder.Container:GetChildren()) do
+						if Option:IsA("TextButton") then
+							Option:Destroy()
+						end
+					end
+					Dropdown.DButton.Title.Text = Name
+				end
+				if InitialValue then
+					DropdownInit:SetOption(InitialValue)
+				end
+
+				return DropdownInit
+			end
+			function SectionInit:CreateDropsearch(Name, OptionTable, Callback, InitialValue)
+				local DropsearchInit = {}
+				local Dropsearch = Folder.Dropsearch:Clone()
+				Dropsearch.Name = Name .. " DS"
+				Dropsearch.Parent = Section.Container
+
+				Dropsearch.DButton.Title.Text = Name
+
+				Dropsearch.Holder.Container.UIListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+					Dropsearch.Holder.Container.CanvasSize = UDim2.new(0,0,0,Dropsearch.Holder.Container.UIListLayout.AbsoluteContentSize.Y)
+				end)
+
+				local DropsearchToggle = false
+
+				Dropsearch.DButton.MouseButton1Click:Connect(function()
+					DropsearchToggle = not DropsearchToggle
+					if DropsearchToggle then
+						TweenService:Create(Dropsearch, TweenInfo.new(0.25, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {Size = UDim2.new(0,365,0,192)}):Play()
+						TweenService:Create(Dropsearch.Holder, TweenInfo.new(0.25, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {Size = UDim2.new(0,361,0,163)}):Play()
+						TweenService:Create(Dropsearch.ImageArrow, TweenInfo.new(0.25, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {Rotation = -180}):Play()
+						Dropsearch.Input.ZIndex = 2
+						Dropsearch.Input.Text = ""
+					else
+						TweenService:Create(Dropsearch, TweenInfo.new(0.25, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {Size = UDim2.new(0,365,0,34)}):Play()
+						TweenService:Create(Dropsearch.Holder, TweenInfo.new(0.25, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {Size = UDim2.new(0,361,0,0)}):Play()
+						TweenService:Create(Dropsearch.ImageArrow, TweenInfo.new(0.25, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {Rotation = 0}):Play()
+						Dropsearch.Input.ZIndex = 0
+						Dropsearch.Input.Text = ""
+					end
+				end)
+
+				local function ResetOption()
+					for _,Options in pairs(Dropsearch.Holder.Container:GetChildren()) do
+						if Options:IsA("TextButton") then
+							TweenService:Create(Options, TweenInfo.new(0.1, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {BackgroundTransparency = 1}):Play()
+							TweenService:Create(Options.Title, TweenInfo.new(0.1, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {TextColor3 = Color3.fromRGB(226, 226, 226)}):Play()
+						end
+					end
+				end
+
+				for _,OptionName in pairs(OptionTable) do
+					local Option = Folder.Option:Clone()
+					Option.Name = OptionName
+					Option.Parent = Dropsearch.Holder.Container
+
+					Option.Title.Text = OptionName
+					table.insert(Library.ColorTable, Option)
+
+					Option.MouseButton1Click:Connect(function()
+						ResetOption()
+						Dropsearch.DButton.Title.Text = Name .. OptionName
+						TweenService:Create(Option, TweenInfo.new(0.1, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {BackgroundTransparency = 0}):Play()
+						TweenService:Create(Option.Title, TweenInfo.new(0.1, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {TextColor3 = Color3.fromRGB(170, 146, 250)}):Play()
+						Callback(OptionName)
+						DropsearchToggle = not DropsearchToggle
+						TweenService:Create(Dropsearch, TweenInfo.new(0.25, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {Size = UDim2.new(0,365,0,34)}):Play()
+						TweenService:Create(Dropsearch.Holder, TweenInfo.new(0.25, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {Size = UDim2.new(0,361,0,0)}):Play()
+						TweenService:Create(Dropsearch.ImageArrow, TweenInfo.new(0.25, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {Rotation = 0}):Play()
+						Dropsearch.Input.ZIndex = 0
+						Dropsearch.Input.Text = ""
+					end)
+				end
+
+				function DropsearchInit:GetOption()
+					return string.gsub(Dropsearch.DButton.Title.Text, Name, "")
+				end
+				function DropsearchInit:SetOption(sName)
+					for _,Option in pairs(Dropsearch.Holder.Container:GetChildren()) do
+						if Option:IsA("TextButton") and string.find(Option.Name, sName) then
+							Dropsearch.DButton.Title.Text = Name .. Option.Name
+							Option.BackgroundTransparency = 0
+							Option.Title.TextColor3 = Color3.fromRGB(170, 146, 250)
+						elseif Option:IsA("TextButton") and not string.find(Option.Name, sName) then
+							Option.BackgroundTransparency = 1
+							Option.Title.TextColor3 = Color3.fromRGB(226, 226, 226)
+						end
+					end
+					Callback(sName)
+				end
+				function DropsearchInit:RemoveOption(sName)
+					for _,Option in pairs(Dropsearch.Holder.Container:GetChildren()) do
+						if Option:IsA("TextButton") and string.find(Option.Name, sName) then
+							Option:Destroy()
+						end
+					end
+					if string.find(Dropsearch.DButton.Title.Text, sName) then
+						Dropsearch.DButton.Title.Text = Name
+					end
+				end
+				function DropsearchInit:ClearOptions()
+					for _, Option in pairs(Dropsearch.Holder.Container:GetChildren()) do
+						if Option:IsA("TextButton") then
+							Option:Destroy()
+						end
+					end
+					Dropsearch.DButton.Title.Text = Name
+				end
+				if InitialValue then
+					DropsearchInit:SetOption(InitialValue)
+				end
+
+				Dropsearch.Input.Changed:Connect(function(property)
+					if property == "Text" then
+						if Dropsearch.Input.Text ~= "" then
+							local Search = Dropsearch.Input.Text:lower()
+							for _, Option in pairs(Dropsearch.Holder.Container:GetChildren()) do
+								if Option:IsA("TextButton") then
+									if string.sub(Option.Name:lower(), 1, #Search) == Search then
+										Option.Visible = true
+									else
+										Option.Visible = false
+									end
+								end
+							end
+							Dropsearch.DButton.Title.Visible = false
+						else
+							for _, Option in pairs(Dropsearch.Holder.Container:GetChildren()) do
+								if Option:IsA("TextButton") then
+									Option.Visible = true
+								end
+							end
+							Dropsearch.DButton.Title.Visible = true
+						end
+					end
+				end)
+
+				return DropsearchInit
+			end
+			function SectionInit:CreateDropselect(Name, OptionTable, Callback, InitialValueTable)
+				local DropselectInit = {}
+				local SelectedOption = {}
+				local Dropselect = Folder.Dropselect:Clone()
+				Dropselect.Name = Name .. " DSE"
+				Dropselect.Parent = Section.Container
+
+				Dropselect.DButton.Title.Text = Name
+
+				Dropselect.Holder.Container.UIListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+					Dropselect.Holder.Container.CanvasSize = UDim2.new(0,0,0,Dropselect.Holder.Container.UIListLayout.AbsoluteContentSize.Y)
+				end)
+
+				local DropselectToggle = false
+
+				Dropselect.DButton.MouseButton1Click:Connect(function()
+					DropselectToggle = not DropselectToggle
+					if DropselectToggle then
+						TweenService:Create(Dropselect, TweenInfo.new(0.25, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {Size = UDim2.new(0,365,0,192)}):Play()
+						TweenService:Create(Dropselect.Holder, TweenInfo.new(0.25, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {Size = UDim2.new(0,361,0,163)}):Play()
+						TweenService:Create(Dropselect.ImageArrow, TweenInfo.new(0.25, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {Rotation = -180}):Play()
+						Dropselect.Input.ZIndex = 2
+						Dropselect.Input.Text = ""
+					else
+						TweenService:Create(Dropselect, TweenInfo.new(0.25, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {Size = UDim2.new(0,365,0,34)}):Play()
+						TweenService:Create(Dropselect.Holder, TweenInfo.new(0.25, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {Size = UDim2.new(0,361,0,0)}):Play()
+						TweenService:Create(Dropselect.ImageArrow, TweenInfo.new(0.25, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {Rotation = 0}):Play()
+						Dropselect.Input.ZIndex = 0
+						Dropselect.Input.Text = ""
+					end
+				end)
+
+				local function TableInsert()
+					SelectedOption = {}
+					for _,Option in pairs(Dropselect.Holder.Container:GetChildren()) do
+						if Option:IsA("TextButton") then
+							if Option.BackgroundTransparency == 0 then
+								table.insert(SelectedOption, Option.Name)
+							else
+								for i, name in ipairs(SelectedOption) do
+									if name == Option.Name then
+										table.remove(SelectedOption, i)
+										break
+									end
+								end
+							end
+						end
+					end
+				end
+
+				local function AddString()
+					Dropselect.DButton.Title.Text = Name
+					Dropselect.DButton.Title.Text = Name .. table.concat(SelectedOption, ", ")
+				end
+
+				for _,OptionName in pairs(OptionTable) do
+					local Option = Folder.Option:Clone()
+					Option.Name = OptionName
+					Option.Parent = Dropselect.Holder.Container
+
+					Option.Title.Text = OptionName
+					table.insert(Library.ColorTable, Option)
+
+					Option.MouseButton1Click:Connect(function()
+						if Option.BackgroundTransparency == 1 then
+							TweenService:Create(Option, TweenInfo.new(0.1, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {BackgroundTransparency = 0}):Play()
+							TweenService:Create(Option.Title, TweenInfo.new(0.1, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {TextColor3 = Color3.fromRGB(170, 146, 250)}):Play()
+						else
+							TweenService:Create(Option, TweenInfo.new(0.1, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {BackgroundTransparency = 1}):Play()
+							TweenService:Create(Option.Title, TweenInfo.new(0.1, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {TextColor3 = Color3.fromRGB(226, 226, 226)}):Play()
+						end
+						task.wait(0.11)
+						TableInsert()
+						AddString()
+						Callback(SelectedOption)
+					end)
+				end
+
+				function DropselectInit:GetOption()
+					return SelectedOption
+				end
+				function DropselectInit:SetOption(Table)
+					for _,Option in pairs(Dropselect.Holder.Container:GetChildren()) do
+						if Option:IsA("TextButton") and table.find(Table, Option.Name) then
+							Option.BackgroundTransparency = 0
+							Option.Title.TextColor3 = Color3.fromRGB(170, 146, 250)
+						elseif Option:IsA("TextButton") and not table.find(Table, Option.Name) then
+							Option.BackgroundTransparency = 1
+							Option.Title.TextColor3 = Color3.fromRGB(226, 226, 226)
+						end
+					end
+					TableInsert()
+					AddString()
+					Callback(SelectedOption)
+				end
+				function DropselectInit:RemoveOption(Name)
+					for _,Option in pairs(Dropselect.Holder.Container:GetChildren()) do
+						if Option:IsA("TextButton") and string.find(Option.Name, Name) then
+							Option:Destroy()
+						end
+					end
+				end
+				function DropselectInit:ClearOptions()
+					for _, Option in pairs(Dropselect.Holder.Container:GetChildren()) do
+						if Option:IsA("TextButton") then
+							Option:Destroy()
+						end
+					end
+					Dropselect.DButton.Title.Text = Name
+				end
+				if InitialValueTable then
+					DropselectInit:SetOption(InitialValueTable)
+				end
+
+				Dropselect.Input.Changed:Connect(function(property)
+					if property == "Text" then
+						if Dropselect.Input.Text ~= "" then
+							local Search = Dropselect.Input.Text:lower()
+							for _, Option in pairs(Dropselect.Holder.Container:GetChildren()) do
+								if Option:IsA("TextButton") then
+									if string.sub(Option.Name:lower(), 1, #Search) == Search then
+										Option.Visible = true
+									else
+										Option.Visible = false
+									end
+								end
+							end
+							Dropselect.DButton.Title.Visible = false
+						else
+							for _, Option in pairs(Dropselect.Holder.Container:GetChildren()) do
+								if Option:IsA("TextButton") then
+									Option.Visible = true
+								end
+							end
+							Dropselect.DButton.Title.Visible = true
+						end
+					end
+				end)
+
+				return DropselectInit
+			end
+			return SectionInit
+		end
+		return TabInit
+	end
+	return WindowInit
+end
+return Library

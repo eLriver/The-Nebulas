@@ -603,6 +603,11 @@ function Library:CreateWindow(Config, Parent)
 					Option.MouseButton1Click:Connect(function()
 						Dropdown.Container.Value.Text = OptionName
 						Callback(OptionName)
+						DropdownToggle = not DropdownToggle
+						Dropdown.Size = UDim2.new(1,-10,0,Dropdown.Title.TextBounds.Y + 25)
+						Dropdown.Container.Holder.Visible = false
+						Dropdown.Input.ZIndex = 0
+						Dropdown.Input.Text = ""
 					end)
 				end
 				function DropdownInit:AddToolTip(Name)
@@ -711,6 +716,9 @@ function Library:CreateWindow(Config, Parent)
 					Option.MouseButton1Click:Connect(function()
 						Dropdown.Container.Value.Text = OptionName
 						Callback(OptionName)
+						DropdownToggle = not DropdownToggle
+						Dropdown.Size = UDim2.new(1,-10,0,Dropdown.Title.TextBounds.Y + 25)
+						Dropdown.Container.Holder.Visible = false
 						Dropdown.Input.ZIndex = 0
 						Dropdown.Input.Text = ""
 					end)
@@ -775,7 +783,6 @@ function Library:CreateWindow(Config, Parent)
 								end
 							end
 							Dropdown.Container.Value.Visible = false
-							Dropdown.Size = UDim2.new(1,-10,0,Dropdown.Container.Holder.Container.ListLayout.AbsoluteContentSize.Y + Dropdown.Title.TextBounds.Y + 30)
 						else
 							for _, Option in pairs(Dropdown.Container.Holder.Container:GetChildren()) do
 								if Option:IsA("TextButton") then
@@ -783,7 +790,13 @@ function Library:CreateWindow(Config, Parent)
 								end
 							end
 							Dropdown.Container.Value.Visible = true
+						end
+						if DropdownToggle then
+							Dropdown.Size = UDim2.new(1,-10,0,Dropdown.Container.Holder.Container.ListLayout.AbsoluteContentSize.Y + Dropdown.Title.TextBounds.Y + 30)
+							Dropdown.Container.Holder.Visible = true
+						else
 							Dropdown.Size = UDim2.new(1,-10,0,Dropdown.Title.TextBounds.Y + 25)
+							Dropdown.Container.Holder.Visible = false
 						end
 					end
 				end)
@@ -792,7 +805,7 @@ function Library:CreateWindow(Config, Parent)
 			function SectionInit:CreateDropselect(Name, OptionTable, Callback, InitialTable)
 				local DropdownInit = {}
 				local SelectedOption = {}
-				local Dropdown = Folder.Dropdown:Clone()
+				local Dropdown = Folder.Dropsearch:Clone()
 				Dropdown.Name = Name .. " DSE"
 				Dropdown.Parent = Section.Container
 
@@ -801,6 +814,10 @@ function Library:CreateWindow(Config, Parent)
 				Dropdown.Container.Position = UDim2.new(0,0,0,Dropdown.Title.TextBounds.Y + 5)
 				Dropdown.Size = UDim2.new(1,-10,0,Dropdown.Title.TextBounds.Y + 25)
 
+				Dropdown.Container.Holder.Container.ListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+					Dropdown.Container.Holder.Size = UDim2.new(1,0,0,Dropdown.Container.Holder.Container.ListLayout.AbsoluteContentSize.Y)
+				end)
+
 				local DropselectToggle = false
 
 				Dropdown.MouseButton1Click:Connect(function()
@@ -808,9 +825,13 @@ function Library:CreateWindow(Config, Parent)
 					if DropselectToggle then
 						Dropdown.Size = UDim2.new(1,-10,0,Dropdown.Container.Holder.Container.ListLayout.AbsoluteContentSize.Y + Dropdown.Title.TextBounds.Y + 30)
 						Dropdown.Container.Holder.Visible = true
+						Dropdown.Input.ZIndex = 4
+						Dropdown.Input.Text = ""
 					else
 						Dropdown.Size = UDim2.new(1,-10,0,Dropdown.Title.TextBounds.Y + 25)
 						Dropdown.Container.Holder.Visible = false
+						Dropdown.Input.ZIndex = 0
+						Dropdown.Input.Text = ""
 					end
 				end)
 
@@ -908,6 +929,37 @@ function Library:CreateWindow(Config, Parent)
 				if InitialTable then
 					DropdownInit:SetOption(InitialTable)
 				end
+				Dropdown.Input.Changed:Connect(function(property)
+					if property == "Text" then
+						if Dropdown.Input.Text ~= "" then
+							local Search = Dropdown.Input.Text:lower()
+							for _, Option in pairs(Dropdown.Container.Holder.Container:GetChildren()) do
+								if Option:IsA("TextButton") then
+									if string.sub(Option.Name:lower(), 1, #Search) == Search then
+										Option.Visible = true
+									else
+										Option.Visible = false
+									end
+								end
+							end
+							Dropdown.Container.Value.Visible = false
+						else
+							for _, Option in pairs(Dropdown.Container.Holder.Container:GetChildren()) do
+								if Option:IsA("TextButton") then
+									Option.Visible = true
+								end
+							end
+							Dropdown.Container.Value.Visible = true
+						end
+						if DropselectToggle then
+							Dropdown.Size = UDim2.new(1,-10,0,Dropdown.Container.Holder.Container.ListLayout.AbsoluteContentSize.Y + Dropdown.Title.TextBounds.Y + 30)
+							Dropdown.Container.Holder.Visible = true
+						else
+							Dropdown.Size = UDim2.new(1,-10,0,Dropdown.Title.TextBounds.Y + 25)
+							Dropdown.Container.Holder.Visible = false
+						end
+					end
+				end)
 				return DropdownInit
 			end
 			function SectionInit:CreateColorpicker(Name,Callback)

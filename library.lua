@@ -11,13 +11,13 @@ local function MakeDraggable(ClickObject, Object)
 	local DragInput = nil
 	local DragStart = nil
 	local StartPosition = nil
-	
+
 	ClickObject.InputBegan:Connect(function(Input)
 		if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
 			Dragging = true
 			DragStart = Input.Position
 			StartPosition = Object.Position
-			
+
 			Input.Changed:Connect(function()
 				if Input.UserInputState == Enum.UserInputState.End then
 					Dragging = false
@@ -25,13 +25,13 @@ local function MakeDraggable(ClickObject, Object)
 			end)
 		end
 	end)
-	
+
 	ClickObject.InputChanged:Connect(function(Input)
 		if Input.UserInputType == Enum.UserInputType.MouseMovement or Input.UserInputType == Enum.UserInputType.Touch then
 			DragInput = Input
 		end
 	end)
-	
+
 	UserInputService.InputChanged:Connect(function(Input)
 		if Input == DragInput and Dragging then
 			local Delta = Input.Position - DragStart
@@ -44,6 +44,7 @@ function Library:CreateWindow(Config, Parent)
 	local WindowInit = {}
 	local Folder = game:GetObjects("rbxassetid://88616048092955")[1]
 	local Screen = Folder.Bracket:Clone()
+	local MobileToggle = Screen.MobileToggle
 	local Main = Screen.Main
 	local Holder = Main.Holder
 	local Topbar = Main.Topbar
@@ -55,12 +56,39 @@ function Library:CreateWindow(Config, Parent)
 		syn.protect_gui(Screen)
 	end
 	]]
-	
+
 	Screen.Name = _G.windowname
 	Screen.Parent = Parent
 	Topbar.WindowName.Text = Config.WindowName
 
 	MakeDraggable(Topbar,Main)
+	MakeDraggable(MobileToggle, MobileToggle)
+	local isMoved = false
+	local isDown = false
+	MobileToggle.MouseButton1Down:Connect(function()
+		isMoved = false
+		isDown = true
+	end)
+
+	MobileToggle.MouseButton1Up:Connect(function()
+		if isDown and not isMoved then
+			if Library.Toggle then
+				game.CoreGui[_G.windowname].Window.Visible = false
+				Library.Toggle = false
+			else
+				game.CoreGui[_G.windowname].Window.Visible = true
+				Library.Toggle = true
+			end
+		end
+		isDown = false
+	end)
+
+	MobileToggle.InputChanged:Connect(function(Input)
+		if Input.UserInputType == Enum.UserInputType.MouseMovement or Input.UserInputType == Enum.UserInputType.Touch then
+			isMoved = true
+		end
+	end)
+
 	local function CloseAll()
 		for _,Tab in pairs(TContainer:GetChildren()) do
 			if Tab:IsA("ScrollingFrame") then
@@ -233,7 +261,7 @@ function Library:CreateWindow(Config, Parent)
 			Section.Container.ListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
 				Section.Size = UDim2.new(1,0,0,Section.Container.ListLayout.AbsoluteContentSize.Y + 15)
 			end)
-			
+
 			function SectionInit:CreateLabel(Name)
 				local LabelInit = {}
 				local Label = Folder.Label:Clone()
@@ -254,11 +282,11 @@ function Library:CreateWindow(Config, Parent)
 				Button.Parent = Section.Container
 				Button.Title.Text = Name
 				Button.Size = UDim2.new(1,-10,0,Button.Title.TextBounds.Y + 5)
-				
+
 				function ButtonInit:UpdateText(Text)
 					Button.Title.Text = Text
 				end
-				
+
 				table.insert(Library.ColorTable, Button)
 
 				Button.MouseButton1Down:Connect(function()
@@ -339,7 +367,7 @@ function Library:CreateWindow(Config, Parent)
 				Toggle.Parent = Section.Container
 				Toggle.Title.Text = Name
 				Toggle.Size = UDim2.new(1,-10,0,Toggle.Title.TextBounds.Y + 5)
-				
+
 				table.insert(Library.ColorTable, Toggle.Toggle)
 				local ToggleState = false
 
@@ -447,7 +475,7 @@ function Library:CreateWindow(Config, Parent)
 				local Slider = Folder.Slider:Clone()
 				Slider.Name = Name .. " S"
 				Slider.Parent = Section.Container
-				
+
 				Slider.Title.Text = Name
 				Slider.Slider.Bar.Size = UDim2.new(Min / Max,0,1,0)
 				Slider.Slider.Bar.BackgroundColor3 = Config.Color
@@ -483,7 +511,7 @@ function Library:CreateWindow(Config, Parent)
 					elseif Slider.Value.Text == "" or tonumber(Slider.Value.Text) >= Max then
 						Slider.Value.Text = Max
 					end
-		
+
 					GlobalSliderValue = Slider.Value.Text
 					Slider.Slider.Bar.Size = UDim2.new(Slider.Value.Text / Max,0,1,0)
 					Slider.Value.PlaceholderText = Slider.Value.Text

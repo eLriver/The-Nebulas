@@ -73,10 +73,10 @@ function Library:CreateWindow(Config, Parent)
 	MobileToggle.MouseButton1Up:Connect(function()
 		if isDown and not isMoved then
 			if Library.Toggle then
-				game.CoreGui[_G.windowname].Window.Visible = false
+				game.CoreGui[_G.windowname].Main.Visible = false
 				Library.Toggle = false
 			else
-				game.CoreGui[_G.windowname].Window.Visible = true
+				game.CoreGui[_G.windowname].Main.Visible = true
 				Library.Toggle = true
 			end
 		end

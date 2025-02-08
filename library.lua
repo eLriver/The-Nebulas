@@ -42,10 +42,9 @@ end
 
 function Library:CreateWindow(Config, Parent)
 	local WindowInit = {}
-	local Folder = game:GetObjects("rbxassetid://98051425121243")[1]
+	local Folder = game:GetObjects("rbxassetid://103204306531341")[1]
 	local Screen = Folder.Bracket:Clone()
 	local MobileToggle = Screen.MobileToggle
-	Mobile.Position = UDim2.new(1,50,1,15)
 	local Main = Screen.Main
 	local Holder = Main.Holder
 	local Topbar = Main.Topbar

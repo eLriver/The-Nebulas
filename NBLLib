@@ -510,6 +510,32 @@ function Library:CreateWindow(Name, Parent)
 					end
 					Dropdown.DButton.Title.Text = Name
 				end
+				function DropdownInit:Refresh(Options, Delete)
+					if Delete then
+						DropdownInit:ClearOptions()
+					end
+
+					for _,OptionName in pairs(Options) do
+						local Option = Folder.Option:Clone()
+						Option.Name = OptionName
+						Option.Parent = Dropdown.Holder.Container
+	
+						Option.Title.Text = OptionName
+						table.insert(Library.ColorTable, Option)
+	
+						Option.MouseButton1Click:Connect(function()
+							ResetOption()
+							Dropdown.DButton.Title.Text = Name .. OptionName
+							TweenService:Create(Option, TweenInfo.new(0.1, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {BackgroundTransparency = 0}):Play()
+							TweenService:Create(Option.Title, TweenInfo.new(0.1, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {TextColor3 = Color3.fromRGB(170, 146, 250)}):Play()
+							Callback(OptionName)
+							DropdownToggle = not DropdownToggle
+							TweenService:Create(Dropdown, TweenInfo.new(0.25, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {Size = UDim2.new(0,365,0,34)}):Play()
+							TweenService:Create(Dropdown.Holder, TweenInfo.new(0.25, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {Size = UDim2.new(0,361,0,0)}):Play()
+							TweenService:Create(Dropdown.ImageArrow, TweenInfo.new(0.25, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {Rotation = 0}):Play()
+						end)
+					end
+				end
 				if InitialValue then
 					DropdownInit:SetOption(InitialValue)
 				end
@@ -612,6 +638,34 @@ function Library:CreateWindow(Name, Parent)
 						end
 					end
 					Dropsearch.DButton.Title.Text = Name
+				end
+				function DropsearchInit:Refresh(Options, Delete)
+					if Delete then
+						DropsearchInit:ClearOptions()
+					end
+
+					for _,OptionName in pairs(Options) do
+						local Option = Folder.Option:Clone()
+						Option.Name = OptionName
+						Option.Parent = Dropsearch.Holder.Container
+	
+						Option.Title.Text = OptionName
+						table.insert(Library.ColorTable, Option)
+	
+						Option.MouseButton1Click:Connect(function()
+							ResetOption()
+							Dropsearch.DButton.Title.Text = Name .. OptionName
+							TweenService:Create(Option, TweenInfo.new(0.1, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {BackgroundTransparency = 0}):Play()
+							TweenService:Create(Option.Title, TweenInfo.new(0.1, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {TextColor3 = Color3.fromRGB(170, 146, 250)}):Play()
+							Callback(OptionName)
+							DropsearchToggle = not DropsearchToggle
+							TweenService:Create(Dropsearch, TweenInfo.new(0.25, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {Size = UDim2.new(0,365,0,34)}):Play()
+							TweenService:Create(Dropsearch.Holder, TweenInfo.new(0.25, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {Size = UDim2.new(0,361,0,0)}):Play()
+							TweenService:Create(Dropsearch.ImageArrow, TweenInfo.new(0.25, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {Rotation = 0}):Play()
+							Dropsearch.Input.ZIndex = 0
+							Dropsearch.Input.Text = ""
+						end)
+					end
 				end
 				if InitialValue then
 					DropsearchInit:SetOption(InitialValue)
@@ -753,6 +807,35 @@ function Library:CreateWindow(Name, Parent)
 						end
 					end
 					Dropselect.DButton.Title.Text = Name
+				end
+				function DropselectInit:Refresh(Options, Delete)
+					if Delete then
+						DropselectInit:ClearOptions()
+						table.clear(SelectedOption)
+					end
+
+					for _,OptionName in pairs(Options) do
+						local Option = Folder.Option:Clone()
+						Option.Name = OptionName
+						Option.Parent = Dropselect.Holder.Container
+	
+						Option.Title.Text = OptionName
+						table.insert(Library.ColorTable, Option)
+	
+						Option.MouseButton1Click:Connect(function()
+							if Option.BackgroundTransparency == 1 then
+								TweenService:Create(Option, TweenInfo.new(0.1, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {BackgroundTransparency = 0}):Play()
+								TweenService:Create(Option.Title, TweenInfo.new(0.1, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {TextColor3 = Color3.fromRGB(170, 146, 250)}):Play()
+							else
+								TweenService:Create(Option, TweenInfo.new(0.1, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {BackgroundTransparency = 1}):Play()
+								TweenService:Create(Option.Title, TweenInfo.new(0.1, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {TextColor3 = Color3.fromRGB(226, 226, 226)}):Play()
+							end
+							task.wait(0.11)
+							TableInsert()
+							AddString()
+							Callback(SelectedOption)
+						end)
+					end
 				end
 				if InitialValueTable then
 					DropselectInit:SetOption(InitialValueTable)
